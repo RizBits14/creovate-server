@@ -43,13 +43,12 @@ async function run() {
 
         // Arts APIs
         app.get('/arts', async (req, res) => {
-            const email = req.query.email
+            const visibility = req.query.visibility
             const query = {}
-            if (email) {
-                query.email = email
+            if(visibility){
+                query.visibility = visibility
             }
-            const cursor = artsCollections.find(query)
-            const result = await cursor.toArray()
+            const result = await artsCollections.find(query).sort({createdAt: -1}).toArray()
             res.send(result)
         })
 
