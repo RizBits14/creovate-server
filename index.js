@@ -37,12 +37,14 @@ async function run() {
 
         app.get('/arts', async (req, res) => {
             const visibility = req.query.visibility;
-            const query = visibility ? { visibility } : {};
-
+            const email = req.query.email;
+            const query = {};
+            if (visibility) query.visibility = visibility;
+            if (email) query.email = email; 
             const result = await artsCollections.find(query).sort({ createdAt: -1 }).toArray();
-
             res.send(result);
         });
+
 
         app.get('/arts/:id', async (req, res) => {
             const id = req.params.id;
@@ -69,7 +71,7 @@ async function run() {
             const id = req.params.id;
             const updatedData = req.body;
 
-            const result = await artsCollections.updateOne({ _id: new ObjectId(id) },{ $set: updatedData }
+            const result = await artsCollections.updateOne({ _id: new ObjectId(id) }, { $set: updatedData }
             );
 
             res.send(result);
@@ -78,7 +80,7 @@ async function run() {
         app.patch('/arts/:id/like', async (req, res) => {
             const id = req.params.id;
 
-            const result = await artsCollections.updateOne({ _id: new ObjectId(id) },{ $inc: { likes: 1 } }
+            const result = await artsCollections.updateOne({ _id: new ObjectId(id) }, { $inc: { likes: 1 } }
             );
 
             res.send(result);
