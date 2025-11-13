@@ -26,11 +26,20 @@ app.get('/', (req, res) => {
 
 async function run() {
     try {
-        await client.connect()
 
         const db = client.db('creovate_db')
         const artsCollections = db.collection('arts')
         const favouriteCollection = db.collection('favourites')
+
+        async function connectDB() {
+            if (!db) {
+                await client.connect();
+                db = client.db('creovate_db');
+                artsCollections = db.collection('arts');
+                favouriteCollection = db.collection('favourites');
+                console.log("MongoDB connected successfully.");
+            }
+        }
 
         // Arts APIs
         app.get('/arts', async (req, res) => {
@@ -48,6 +57,11 @@ async function run() {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const result = await artsCollections.findOne(query)
+            res.send(result)
+        })
+
+        app.get('/featured', async(req, res) => {
+            const result = await artsCollections.find({visibility:"Public"}).sort({createdAt: -1}).limit(6).toArray()
             res.send(result)
         })
 
@@ -99,7 +113,7 @@ async function run() {
             res.send(result)
         })
 
-        app.delete('/favourites/:artworkkId', async (req, res) => {
+        app.delete('/favourites/:artworkId', async (req, res) => {
             const { artworkId } = req.params
             const result = await favouriteCollection.deleteOne({ artworkId })
             res.send(result)
