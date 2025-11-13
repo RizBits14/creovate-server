@@ -40,11 +40,17 @@ async function run() {
             const email = req.query.email;
             const query = {};
             if (visibility) query.visibility = visibility;
-            if (email) query.email = email; 
+            if (email) query.email = email;
             const result = await artsCollections.find(query).sort({ createdAt: -1 }).toArray();
             res.send(result);
         });
 
+        app.get("/my-arts", async (req, res) => {
+            const email = req.query.email;
+            if (!email) return res.send([]);
+            const result = await artsCollections  .find({ email }).sort({ createdAt: -1 }).toArray();
+            res.send(result);
+        });
 
         app.get('/arts/:id', async (req, res) => {
             const id = req.params.id;
