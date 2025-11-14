@@ -48,7 +48,7 @@ async function run() {
         app.get("/my-arts", async (req, res) => {
             const email = req.query.email;
             if (!email) return res.send([]);
-            const result = await artsCollections  .find({ email }).sort({ createdAt: -1 }).toArray();
+            const result = await artsCollections.find({ email }).sort({ createdAt: -1 }).toArray();
             res.send(result);
         });
 
@@ -75,13 +75,15 @@ async function run() {
 
         app.patch('/arts/:id', async (req, res) => {
             const id = req.params.id;
-            const updatedData = req.body;
-
-            const result = await artsCollections.updateOne({ _id: new ObjectId(id) }, { $set: updatedData }
+            const updatedData = { ...req.body };
+            delete updatedData._id;
+            const result = await artsCollections.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: updatedData }
             );
-
-            res.send(result);
+            res.json({ success: true, result });
         });
+
 
         app.patch('/arts/:id/like', async (req, res) => {
             const id = req.params.id;
@@ -95,7 +97,10 @@ async function run() {
         app.delete('/arts/:id', async (req, res) => {
             const id = req.params.id;
             const result = await artsCollections.deleteOne({ _id: new ObjectId(id) });
-            res.send(result);
+            if (result.deletedCount === 0) {
+                return res.status(404).json({ success: false, deletedCount: 0, message: "Not found" });
+            }
+            res.json({ success: true, deletedCount: result.deletedCount });
         });
 
         app.post('/favourites', async (req, res) => {
