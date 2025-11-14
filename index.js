@@ -21,19 +21,25 @@ const client = new MongoClient(uri, {
     }
 });
 
-app.get('/', (req, res) => {
-    res.send('Creovate backend is running');
-});
+// app.get('/', (req, res) => {
+//     res.send('Creovate backend is running');
+// });
 
 async function run() {
     try {
-        await client.connect();
-        console.log("MongoDB connected successfully.");
+        // await client.connect();
+        // console.log("MongoDB connected successfully.");
 
         // DB & Collections
+        // app.get('/testbefore', (req,res)=>{
+        //     res.send('Test before is running')
+        // })
         const db = client.db('creovate_db');
         const artsCollections = db.collection('arts');
         const favouriteCollection = db.collection('favourites');
+        // app.get('/testafter', (req,res)=>{
+        //     res.send('Test after is running')
+        // })
 
         app.get('/arts', async (req, res) => {
             const visibility = req.query.visibility;
@@ -60,15 +66,12 @@ async function run() {
 
         app.get('/featured', async (req, res) => {
             const result = await artsCollections.find({ visibility: "Public" }).sort({ createdAt: -1 }).limit(6).toArray();
-
             res.send(result);
         });
 
         app.post('/arts', async (req, res) => {
             const newArt = req.body;
-
             newArt.createdAt = new Date();
-
             const result = await artsCollections.insertOne(newArt);
             res.send(result);
         });
@@ -141,14 +144,18 @@ async function run() {
             res.send(result);
         });
 
-        console.log("Creovate API is ready.");
-    } catch (error) {
-        console.error("Error connecting to MongoDB:", error);
+        // console.log("Creovate API is ready.");
+    } finally {
+        // console.error("Error connecting to MongoDB:", error);
     }
 }
 
 run().catch(console.dir);
+app.get('/', (req, res) => {
+    res.send('Creovate is Running on Server')
+})
 
 app.listen(port, () => {
-    console.log(`Creovate server running on port ${port}`);
-});
+    console.log(`Server is Listening on port ${port}`)
+})
+
