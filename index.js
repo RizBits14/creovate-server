@@ -104,8 +104,16 @@ async function run() {
         });
 
         app.post('/favourites', async (req, res) => {
-            const result = await favouriteCollection.insertOne(req.body);
-            res.send(result);
+            const { userEmail, artworkId } = req.body;
+            if (!userEmail || !artworkId) {
+                return res.json({ success: false, message: "Missing userEmail or artworkId" });
+            }
+            const exists = await favouriteCollection.findOne({ userEmail, artworkId });
+            if (exists) {
+                return res.json({ success: false, message: "Already added", already: true });
+            }
+            await favouriteCollection.insertOne({ userEmail, artworkId, createdAt: new Date() });
+            res.json({ success: true, message: "Added to favourites" });
         });
 
         app.get('/favourites', async (req, res) => {
@@ -113,6 +121,19 @@ async function run() {
             const result = await favouriteCollection.find({ userEmail: email }).toArray();
             res.send(result);
         });
+
+        app.get('/favourites/check', async (req, res) => {
+            const { email, artId } = req.query;
+            if (!email || !artId) {
+                return res.json({ exists: false });
+            }
+            const exists = await favouriteCollection.findOne({
+                userEmail: email,
+                artworkId: artId
+            });
+            res.json({ exists: !!exists });
+        });
+
 
         app.delete('/favourites/:artworkId', async (req, res) => {
             const artworkId = req.params.artworkId;
