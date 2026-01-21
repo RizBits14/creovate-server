@@ -35,7 +35,7 @@ let db,
 
 async function connectDB() {
     if (db) return;
-    await client.connect();
+    // await client.connect();
 
     db = client.db("creovate_db");
     artsCollection = db.collection("arts");
